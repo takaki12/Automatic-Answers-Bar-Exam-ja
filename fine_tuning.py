@@ -81,7 +81,8 @@ class DataModuleGenerator(pl.LightningDataModule):
 
     def test_dataloader(self):
         return DataLoader(self.test_dataset, batch_size=self.test_batch_size)
-    
+
+# モデルクラスの設計
 class ModelForSequenceClassification_pl(pl.LightningModule):
     def __init__(self, model_name, num_labels, result_output = './scores.csv', lr=1e-5):
         """_summary_
@@ -164,6 +165,7 @@ def apply_data_augumentation(datalist):
 
     return return_datalist
 
+# データセットの辞書の作成
 def make_dataset(datalist, tokenizer):
     dataset = {'text':[], 'label':[]}
     for d in datalist:
@@ -252,12 +254,10 @@ def finetuning(output_dir, model_name, tokenizer, train_df, val_df, test_df):
 if __name__=='__main__':
     # Setting ------------
     model_name = 'cl-tohoku/bert-base-japanese-whole-word-masking'
-    #model_name = 'ku-nlp/deberta-v2-base-japanese'
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     test_years = ['R02']
-    #data_dir = '/home/tonaga/PycharmProjects/COLIEE2023/data/processed/coliee_data_top1'
-    data_dir = '/home/tonaga/PycharmProjects/COLIEE2023/data/processed/coliee_data_top1'
-    output_dir = '/home/tonaga/PycharmProjects/COLIEE2023/bert_05/bert_R02_wwm'
+    data_dir = 'data/coliee_data_top1'
+    output_dir = 'output'
     # --------------------
     os.makedirs(output_dir, exist_ok=False)
     setting_log = ""
@@ -306,7 +306,7 @@ if __name__=='__main__':
 
         train_datalist = []
         # 民法条文より訓練データ作成
-        with open("/home/tonaga/PycharmProjects/COLIEE2023/data/processed/minpou_dataset_tadashi.csv", 'r') as f:
+        with open("./data/minpou_dataset_tadashi.csv", 'r') as f:
             for row in csv.reader(f):
                 train_datalist.append([row[0], row[1], row[2]])
 
