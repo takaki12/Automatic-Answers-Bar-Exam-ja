@@ -1,3 +1,5 @@
+# 構文解析を用いた処理を管理するモジュール
+
 import CaboCha
 import sys
 import codecs
@@ -75,10 +77,20 @@ def return_svo_triple(sentence:str) -> Tuple[Dict, List]:
 
     return (svo_dict, svo_arrow_text)
 
-
+# 最後の述語表現を削除する
+def delete_predicate(t2):
+    svo_dict, svo_arrow_text = return_svo_triple(t2)
+    predicate = svo_dict['述語']
+    t2_no_predicate = t2[:t2.rfind(predicate)] # 最後の述語までを格納
+    return t2_no_predicate
 
 if __name__=='__main__':
     sentence = '成年被後見人Ａが未成年者Ｂの法定代理人としてした行為は、Ａの行為能力の制限によっては取り消すことができない。'
+
+    print("-- return_svo_triple --")
     svo_dict, svo_arrow_text = return_svo_triple(sentence)
-    print(svo_dict)
-    print(svo_arrow_text)
+    print('svo_dict', svo_dict)
+    print('svo_arrow_text', svo_arrow_text)
+
+    print("-- delete_predicate --")
+    print(delete_predicate(sentence))
