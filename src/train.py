@@ -5,7 +5,6 @@ import os
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 os.environ["CUDA_VISIBLE_DEVICES"] = "3"
 
-import csv
 import pandas as pd
 
 from transformers import BertJapaneseTokenizer, AutoTokenizer 
@@ -16,6 +15,7 @@ from pytorch_lightning import loggers as pl_loggers
 
 from model import ModelForSequenceClassification_pl
 from data_module import DataModuleGenerator
+from preprocessing.load_problems import load_problems
 
 # Setting ------------
 model_name = 'cl-tohoku/bert-base-japanese-whole-word-masking'
@@ -83,9 +83,9 @@ def main():
     )
 
     # データの読み込み
-    train_datalist = []
-    val_datalist = []
-    test_datalist = []
+    train_datalist = load_problems(train_year)
+    val_datalist = load_problems(val_year)
+    test_datalist = load_problems(test_year)
 
     train_dataset = make_dataset(train_datalist, tokenizer)
     val_dataset = make_dataset(val_datalist, tokenizer)
