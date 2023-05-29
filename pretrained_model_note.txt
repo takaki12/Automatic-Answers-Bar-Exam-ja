@@ -1,0 +1,4 @@
+BERT : cl-tohoku/bert-base-japanese-whole-word-masking
+LUKE : studio-ousia/luke-japanese-base
+Sentence-BERT : sonoisa/sentence-bert-base-ja-mean-tokens-v2
+Sentence-LUKE : sonoisa/sentence-luke-japanese-base-lite
