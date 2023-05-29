@@ -3,11 +3,12 @@
 import os
 import re
 import csv
-import LegalDataList
+import legal_datalist
 
 def make_logical_inversion(data):
     """
     否定形の文章を作成します。
+    ex:売主が買主に代金の支払いを請求する。 -> 売主が買主に代金の支払いを請求しない。
 
     Args:
         data (str): 問題文
@@ -29,7 +30,7 @@ def make_logical_inversion(data):
     processed_data = data
 
     changed = False
-    for verb in LegalDataList.NotList:
+    for verb in legal_datalist.notlist:
         if (verb[0] + "。\n") in data:
             processed_data = data.replace((verb[0]+ "。\n"), verb[1]+ "。")
             changed = True
@@ -56,6 +57,7 @@ def person_replacement(data):
     """
     判例問題(AやBで表された人物が登場する問題)風の問題を作成.
     人物名を抽出すし、でてきた順にA,B,C...と置き換える.
+    ex:売主が買主に代金の支払いを請求する。 -> AがBに代金の支払いを請求しない。
 
     Args:
         data (str): 問題文
@@ -63,15 +65,15 @@ def person_replacement(data):
     data = data.replace('\n','')
     processed_data = data
 
-    for alphabet in LegalDataList.LARGEAB:
+    for alphabet in legal_datalist.Alphabet:
         if alphabet in data:
             # すでに判例問題ならなにもしない
             return "none"
     
     cnt = 0
-    for person in LegalDataList.PersonList:
+    for person in legal_datalist.personlist:
         if (person+"が") in processed_data or (person+"を") in processed_data or (person+"の") in processed_data or (person+"に") in processed_data or (person+"は") in processed_data or (person+"、") in processed_data or (person+"又") in processed_data:
-            processed_data = processed_data.replace(person, LegalDataList.LARGEAB[-1] + str(cnt)) # 一時的にZ+n(1,2,3,...)に置換
+            processed_data = processed_data.replace(person, legal_datalist.Alphabet[-1] + str(cnt)) # 一時的にZ+n(1,2,3,...)に置換
             cnt += 1
     
     # 人物名がひとつも登場しない場合はここで終わり
@@ -82,7 +84,7 @@ def person_replacement(data):
     # 順番調べる
     z_dict = {}
     for i in range(cnt):
-        key = LegalDataList.LARGEAB[-1] + str(i)
+        key = legal_datalist.Alphabet[-1] + str(i)
         z_dict[key] = processed_data.index(key)
     z_sorted = sorted(z_dict.items(), key=lambda x:x[1])
     #print(z_sorted)
@@ -90,7 +92,7 @@ def person_replacement(data):
     # 前から置き換え!
     for i, z in enumerate(z_sorted):
         target = z[0]
-        processed_data = processed_data.replace(target, LegalDataList.LARGEAB[i])
+        processed_data = processed_data.replace(target, legal_datalist.Alphabet[i])
     
     return processed_data
 
