@@ -69,6 +69,7 @@ class DataModuleGenerator(pl.LightningDataModule):
         self.val_dataset = DatasetGenerator(self.val_df, self.tokenizer, self.max_length)
         self.test_dataset = DatasetGenerator(self.test_df, self.tokenizer, self.max_length)
 
+    # 訓練用データローダー
     def train_dataloader(self):
         return DataLoader(self.train_dataset, batch_size=self.train_batch_size, shuffle=True)
 
