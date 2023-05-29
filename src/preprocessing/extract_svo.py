@@ -5,6 +5,10 @@ import codecs
 from typing import Dict, Tuple, List
 
 def return_svo_triple(sentence:str) -> Tuple[Dict, List]:
+    """
+    # 文章からSVOを抽出する
+    # 参考: https://qiita.com/Afo_guard_enthusiast/items/c6d3b778d36e69e84a34
+    """
     c = CaboCha.Parser()
     tree = c.parse(sentence)
     size = tree.size()
@@ -70,6 +74,8 @@ def return_svo_triple(sentence:str) -> Tuple[Dict, List]:
                 #print(predicate_word)
 
     return (svo_dict, svo_arrow_text)
+
+
 
 if __name__=='__main__':
     sentence = '成年被後見人Ａが未成年者Ｂの法定代理人としてした行為は、Ａの行為能力の制限によっては取り消すことができない。'
