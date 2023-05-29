@@ -14,7 +14,7 @@ LargeNumDict_re = {'１':1,'２':2,'３':3,'４':4,'５':5,'６':6,'７':7,'８'
 Alphabet = ["Ａ","Ｂ","Ｃ","Ｄ","Ｅ","Ｆ","Ｇ","Ｈ","Ｉ","Ｊ","Ｋ","Ｌ","Ｍ","Ｎ","Ｏ","Ｐ","Ｑ","Ｒ","Ｓ","Ｔ","Ｕ","Ｖ","Ｗ","Ｘ","Ｙ","Ｚ"] # 全角アルファベット
 
 
-# データ整形で使うデータリスト ----------
+# データ加工で使うデータリスト ----------
 # 「次に掲げる〇〇」の〇〇を格納するリスト
 nextlist = []
 with open("data/external/next_list.txt", 'r') as f:
@@ -32,6 +32,12 @@ for x in nextlist:
     okikae_nextlist.append("において"+x)
     okikae_nextlist.append("に規定する"+x)
 okikae_nextlist.sort(reverse=True, key=len)
+
+# 「ただし、~この限りでない」を置き換える
+minpoudict_withKou_tadashi = {}
+with open("data/external/tadashi_konokagiridenai.csv", 'r') as f:
+    for row in csv.reader(f):
+        minpoudict_withKou_tadashi[row[0]] = row[1]
 
 
 # データ拡張で使うデータリスト ----------
