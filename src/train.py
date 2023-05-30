@@ -44,7 +44,7 @@ def make_dataset(datalist, tokenizer):
         dataset['label'].append(label)
     return dataset
 
-def main():
+def fine_tuning():
     # フォルダの上書き防止 -> 出力フォルダ作成
     if os.path.exists(output_dir):
         print("The path exists.")
@@ -140,4 +140,4 @@ def main():
     finetuning_model.model_sc.save_pretrained(output_dir + '/model_finetuning/')
 
 if __name__=='__main__':
-    main()
+    fine_tuning()
