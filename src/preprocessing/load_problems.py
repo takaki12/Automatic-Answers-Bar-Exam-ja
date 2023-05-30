@@ -119,21 +119,21 @@ def make_minpoudict(texts):
             # ↑のようになっているため、一行目を読み飛ばし二行目から代入していく
             #Tuginikakageru_beforetextに "Aは" ,Tuginikakageru_aftertextに "を持つ" を代入する
 
-            findNext = False
+            finednext = False
             for next in legal_datalist.nextlist:
                 if ('次に掲げる'+next) in data:
                     Tuginikakageru_beforetext = re.split(('次に掲げる'+next),data)[0]
                     Tuginikakageru_aftertext = re.split(('次に掲げる'+next),data)[1]
-                    findNext=True
+                    finednext=True
             if '次の各号に掲げる' in data:
                 Tuginikakageru_beforetext = re.split('次の各号に掲げる',data)[0]
                 Tuginikakageru_aftertext = re.split('次の各号に掲げる',data)[1]
-                findNext=True
+                finednext=True
             if '次のとおり' in data:
                 Tuginikakageru_beforetext = re.split('次のとおり',data)[0]
                 Tuginikakageru_aftertext = re.split('次のとおり',data)[1]
-                findNext=True
-            if not findNext:
+                finednext=True
+            if not finednext:
                 print('new次に掲げる:'+data)
             condition = 1
 
@@ -160,11 +160,12 @@ def make_minpoudict(texts):
             if re.search('.*?この限りでない', tadashi_text) and article_num + '_' + kou_num in legal_datalist.minpoudict_withKou_tadashi.keys():
                 tadashi_text = legal_datalist.minpoudict_withKou_tadashi[article_num + '_' + kou_num]
             
+            # すでにキーがあればappend
             if article_num + "_" + kou_num in Minpoudict:
                 Minpoudict[article_num + "_" + kou_num].append(data)
                 if tadashi_text != '' and tadashi_text not in Minpoudict[article_num + "_" + kou_num]:
                     Minpoudict[article_num + "_" + kou_num].append(tadashi_text)
-            else:
+            else: # ないなら作る
                 Minpoudict[article_num + "_" + kou_num] = [data]
                 if tadashi_text != '' and tadashi_text not in Minpoudict[article_num + "_" + kou_num]:
                     Minpoudict[article_num + "_" + kou_num].append(tadashi_text)
@@ -178,12 +179,12 @@ def make_minpoudict(texts):
     return Minpoudict
 
 # 司法試験問題のxmlを読み込んでデータリストに変換する!
-def load_problems(years, mode=1):
+def load_problems(year, mode=1):
     '''
     学習・検証・テストに使うxmlファイルを読み込んでリストで出力する.
 
     Args:
-        years (list[str]): 読み込む年度の指定 (drive_dir内のファイルのみ)
+        year (str): 読み込む年度の指定 (drive_dir内のファイルのみ)
         mode (int): 0か1で指定. 0の場合、正解ラベルがなくても問題を読み込む & ラベルを出力しない.
 
     Returns:
@@ -196,99 +197,99 @@ def load_problems(years, mode=1):
         data_dir += 'test'
 
     coliee_problems = []
-    for year in years:
-        # ファイル名 : riteval_H18_jp.xml. H18のところを変えていく
-        file = open(data_dir + "/riteval_" + year + "_jp.xml", 'r')
 
-        number = '' # 問題番号
-        label = 0 # 正解ラベル
-        article_dict = {}
-        article = '' # 条文
-        problem = '' # 問題文
-        condition = 0 # 1:条文 or 2:問題文 かを判定
+    # ファイル名 : riteval_H18_jp.xml. H18のところを変えていく
+    file = open(data_dir + "/riteval_" + year + "_jp.xml", 'r')
 
-        for line in file.readlines():
-            line = line.replace('\n','')
+    number = '' # 問題番号
+    label = 0 # 正解ラベル
+    article_dict = {}
+    article = '' # 条文
+    problem = '' # 問題文
+    condition = 0 # 1:条文 or 2:問題文 かを判定
 
-            # 読点の統一
-            line = re.sub(',|，','、', line)
+    for line in file.readlines():
+        line = line.replace('\n','')
 
-            # 問題番号、ラベルを読み込む
-            if re.search(ptn_id, line):
-                match = re.search(ptn_id, line)
-                number = match.group(1)
-                if number == '':
-                    print("Number is Unknown")
-                    print(line)
-                    exit()
+        # 読点の統一
+        line = re.sub(',|，','、', line)
 
-            if re.search(ptn_label, line) and mode != 0:
-                match = re.search(ptn_label, line).group(1)
-                if match == 'Y':
-                    label = 1
-                elif match == 'N':
-                    label = 0
-                else:
-                    print("Label is Unknown")
-                    print(line)
-                    exit()
+        # 問題番号、ラベルを読み込む
+        if re.search(ptn_id, line):
+            match = re.search(ptn_id, line)
+            number = match.group(1)
+            if number == '':
+                print("Number is Unknown")
+                print(line)
+                exit()
 
-            # 関連条文スタート
-            if '<t1>' in line:
-                condition = 1
+        if re.search(ptn_label, line) and mode != 0:
+            match = re.search(ptn_label, line).group(1)
+            if match == 'Y':
+                label = 1
+            elif match == 'N':
+                label = 0
+            else:
+                print("Label is Unknown")
+                print(line)
+                exit()
 
-            # 関連条文に文章がある場合の処理
-            if condition == 1 and (line != '<t1>') and (line != '</t1>'):
-                line = line.replace('<t1>','') # タグは消す
-                article += line
-                    
-            # 関連条文エンド
-            if '</t1>' in line:
-                condition = 0
-                article = article.replace('</t1>','') # タグは消す
-                article_dict = make_minpoudict(article)
+        # 関連条文スタート
+        if '<t1>' in line:
+            condition = 1
 
-            # 問題文スタート
-            if '<t2>' in line:
-                condition = 2
-                if line == '<t2>':
-                    continue
+        # 関連条文に文章がある場合の処理
+        if condition == 1 and (line != '<t1>') and (line != '</t1>'):
+            line = line.replace('<t1>','') # タグは消す
+            article += line + '\n'
+    
+        # 関連条文エンド
+        if '</t1>' in line:
+            condition = 0
+            article = article.replace('</t1>','') # タグは消す
+            article_dict = make_minpoudict(article)
+        
+        # 問題文スタート
+        if '<t2>' in line:
+            condition = 2
+            if line == '<t2>':
+                continue
 
-            # 特殊処理 (H26・H27用) いらない部分は消す -----------------------------
-            if 'に関する次の１から５までの各記述のうち、正しいものはどれか。' in line:
-                line = line.replace('に関する次の１から５までの各記述のうち、正しいものはどれか。', '、')
-            elif 'ことを前提として、次の１から４までの各記述のうち、誤っているものを２個選びなさい' in line:
-                line = line.replace('ことを前提として、次の１から４までの各記述のうち、誤っているものを２個選びなさい', '')
-                
-            elif re.search('〔第.*?問〕（配点：.*?）', line):
-                line = re.sub('〔第.*?問〕（配点：.*?）', '', line)
-            # ---------------------------------------------
+        # 特殊処理 (H26・H27用) いらない部分は消す -----------------------------
+        if 'に関する次の１から５までの各記述のうち、正しいものはどれか。' in line:
+            line = line.replace('に関する次の１から５までの各記述のうち、正しいものはどれか。', '、')
+        elif 'ことを前提として、次の１から４までの各記述のうち、誤っているものを２個選びなさい' in line:
+            line = line.replace('ことを前提として、次の１から４までの各記述のうち、誤っているものを２個選びなさい', '')
             
-            if condition == 2 and (line != '</t2>'):
-                line = line.replace('<t2>','') # タグは消す
-                problem += line
+        elif re.search('〔第.*?問〕（配点：.*?）', line):
+            line = re.sub('〔第.*?問〕（配点：.*?）', '', line)
+        # ---------------------------------------------
+        
+        if condition == 2 and (line != '</t2>'):
+            line = line.replace('<t2>','') # タグは消す
+            problem += line
 
-            # 問題文エンド
-            if '</t2>' in line:
-                condition = 0
-                problem = problem.replace('</t2>','') # タグは消す
+        # 問題文エンド
+        if '</t2>' in line:
+            condition = 0
+            problem = problem.replace('</t2>','') # タグは消す
 
-            # 1問分の読み込み終了
-            if '</pair>' in line:
-                problem = problem.replace('</pair>','') # タグ消し
+        # 1問分の読み込み終了
+        if '</pair>' in line:
+            problem = problem.replace('</pair>','') # タグ消し
 
-                if mode != 0:
-                    coliee_problems.append([label, article, problem, number, article_dict])
-                else:
-                    coliee_problems.append([article, problem, number, article_dict])
-                
-                # 初期化
-                number = ''
-                label = ''
-                article_dict = {}
-                article = ''
-                problem = ''
-                condition = 0
+            if mode != 0:
+                coliee_problems.append([label, article, problem, number, article_dict])
+            else:
+                coliee_problems.append([article, problem, number, article_dict])
+            
+            # 初期化
+            number = ''
+            label = ''
+            article_dict = {}
+            article = ''
+            problem = ''
+            condition = 0
 
         file.close()
 
@@ -296,9 +297,6 @@ def load_problems(years, mode=1):
 
 
 if __name__=='__main__':
-    years = ['H18','H19']
-    problems = load_problems(years)
+    problems = load_problems('H18')
     for i, problem in enumerate(problems):
-        if i == 3:
-            break
         print(problem)
