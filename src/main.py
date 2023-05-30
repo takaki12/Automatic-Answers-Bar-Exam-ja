@@ -26,6 +26,7 @@ model_name = 'studio-ousia/luke-japanese-base'
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 years = ['H18','H19','H20','H21','H22','H23','H24','H25','H26','H27','H28','H29', 'H30','R01','R02','R03', 'R04']
 test_years = ['R04']
+specialize = 0 # 問題別に特化させたモデルを作成するかどうか, {0: なにもしない, 1:AB問題に特化, 2:ABでない問題に特化}
 data_dir = 'data/processed/processed_data_luke' # preprocess.pyの処理後のデータセットを使う
 output_dir = 'output/luke_testR04'
 # --------------------
@@ -239,7 +240,16 @@ def main():
         # データ拡張
         datalist_pro = apply_data_augumentation(all_datalist_train)
         for row in datalist_pro:
-            train_datalist.append(row)
+            # データ特化
+            if specialize == 0: # しない
+                train_datalist.append(row)
+            elif specialize == 1:
+                if 'Ａ' in row[2]: # 問題文にAが含まれるかどうか
+                    train_datalist.append(row)
+            elif specialize == 2:
+                if 'Ａ' not in row[2]: # 問題文にAが含まれるないかどうか
+                    train_datalist.append(row)
+
         
         train_df = pd.DataFrame(make_dataset(train_datalist, tokenizer))
 
@@ -254,7 +264,15 @@ def main():
         # データ拡張
         datalist_pro = apply_data_augumentation(all_datalist_val)
         for row in datalist_pro:
-            val_datalist.append(row)
+            # データ特化
+            if specialize == 0: # しない
+                val_datalist.append(row)
+            elif specialize == 1:
+                if 'Ａ' in row[2]: # 問題文にAが含まれるかどうか
+                    val_datalist.append(row)
+            elif specialize == 2:
+                if 'Ａ' not in row[2]: # 問題文にAが含まれるないかどうか
+                    val_datalist.append(row)
         val_df = pd.DataFrame(make_dataset(val_datalist, tokenizer))
 
         # それぞれのデータを一応出力しておく
