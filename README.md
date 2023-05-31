@@ -10,6 +10,32 @@
 > 車にひかれそうになった人を突き飛ばして助けたが，その人の高価な着物が汚損した場合，着物について損害賠償をする必要はない。  
 
 ## フォルダ構造
+<pre>
+.
+├── data : システムに使うデータを保管する.
+├── src : ソースコード
+├── pretrained_model_note.txt : 事前学習済みモデルのメモ
+└── README.md
+</pre>
+
+## ソースコード
+<pre>
+src
+├── preprocessing : データの前処理用
+    ├── calculate_similarity.py 文章の類似度を計算する
+    ├── data_augmentation.py : データ拡張
+    ├── extract_svo.py : 主語、述語、目的語を抽出する
+    ├── kansuji_converter.py : 漢数字を英数字に変換
+    ├── legal_datalist.py : 前処理で必要になるリストや辞書の管理
+    ├── load_problems.py : データを読み込む.
+    └── preprocess.py : データの前処理をする
+├── data_module.py : データローダーを作成
+├── main.py : データの読み込みとfine-tuningをする
+├── model.py : モデル定義
+├── predict.py : fine-tuningしたモデルの単問予測
+└── train.py : 訓練部分のベースコード
+</pre>
+
 preprocessingフォルダでは、ファインチューニングするためのデータ処理を行っています。  
 ・データ例
 ```
